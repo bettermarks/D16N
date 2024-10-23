@@ -1,0 +1,146 @@
+// To future editors, here is a convenient link to the AsciiDoc syntax
+// quick reference
+//   https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
+
+= D16N Specification 1.0
+bettermarks GmbH
+v1.0, 2024-10-23
+:toc: preamble
+
+
+// TODO: Include links back to this repo, for the case that reader is viewing
+// github pages.
+
+[abstract]
+.Abstract
+The d16n (depseudonimisation) specification describes a protocol for third-party apps to display user identifying information without having it pass through their servers.
+This is written in the context of offering learning tools to children and their teachers, without needing to process personal data.
+
+
+== Introduction
+
+// Repeat parts of the abstract and expand on it
+
+=== Notational Conventions
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in https://www.rfc-editor.org/rfc/rfc2119[RFC 2119].
+
+=== Terminology
+
+CORS:: Cross-Origin Resource Sharing
+Clear Name:: A name that identifies an End-User to another user of the IDP. e.g. the name of a student used offline in the classroom by their teacher.
+Identity Provider (IDP):: Identity Provider
+Pairwise Pseudonymous Identifier (PPID):: 
+Pseudonym:: An user identifier issued from the IDP to the RP. But one that is not Personally Identifying Informatation (PII).
+Relying Party (RP):: Client application that relies on the IDP for user authentication.
+
+== Overview
+
+// Idea: draw overview diagram using https://pikchr.org/ ?
+
+== Authorization
+
+=== The d16n Access Token
+
+The RP obtains a d16n access token on behalf of the user via an OAuth2.
+Only the Authorization Code Grant flow
+
+
+
+The access token MUST be requested with the `d16n` scope.
+
+The `d16n` scope permits access the the Resolve API
+
+// Want to say that implementers may want to give this to teachers but not
+// to students.
+
+
+_Want to recommend that access token lifetime be kept short, e.g. 60s_
+
+
+// Suggest the IDP elide the user confirmation prompt?
+
+== Pseudonyms
+
+This specification assumes that there exists an access controlled API to retrieve the Pseudonyms of other users.
+
+For example, in a learning app context, a teacher would have access to API that returns the Pseudonyms of the members of one of their classes.
+
+== The Resolve API
+
+// Should we just somehow include the openapi spec?
+
+=== Endpoints
+
+These endpoints are implemented by the IDP.
+
+`/users/{id}`::
+    Resolves the Pseudonym of a single user.
+    The `id` is the Pseudonym to resolve.
+
+`/users/`::
+    Batch resolve. Resolves multiple Pseudonyms in a single request.
+    Takes a single query parameter `ids`, a comma separated list of Pseudonyms
+    to resolve.
+
+// I wonder if it would be possible to have these discovered somehow...
+
+=== Resolve Request
+
+// Need to mention
+// - the bearer token
+// - 
+
+Non-normative example
+
+    GET /path/to/d16n/users/550e8400-e29b-41d4-a716-446655440000 HTTP/1.1
+    Host: idp.example.com
+    Authorization: Bearer imAkPG4UVhRf-TM9NcghCA
+
+
+=== Resolve Response
+
+TODO
+- describe the successful response
+
+=== Access
+
+TODO
+- recommend that access is limited to groups that the user is a member of
+  e.g. teachers can access the names of their students
+       teachers can access the names of the other staff at their school
+
+== Implementation
+
+=== Authentication with OpenID Connect
+
+_Want to recommend omitting most of the standard claims <<OIDC>> §5.1, e.g. `given_name`, `family_name` duh!_
+
+
+=== Privacy
+
+The IDP SHOULD issue PPIDs, that is, for any user a different Pseudonym is issued for each unique RP.
+In <<OIDC>> this is the `pairwise` subject identifier type.
+
+// Not sure I should
+Not doing this may allow activity to be correlated across multiple apps and a profile to collated, which encroaches on the user's privacy.
+
+// Useful reading
+// - https://openid.net/specs/openid-connect-core-1_0.html#Privacy § 17
+
+// Maybe we need to have a section on risk?
+// consideration of the use of the clear names inside the frontend app?
+
+== References
+
+[bibliography]
+=== Normative References
+
+* [[[RFC6749]]] Hardt, D., Ed., "https://www.rfc-editor.org/info/rfc6749[The OAuth 2.0 Authorization Framework]", RFC 6749, DOI 10.17487/RFC6749, October 2012.
+
+[bibliography]
+=== Informative References
+* [[OIDC]] Sakimura, N., Bradley, J., Jones, M., de Medeiros, B., and C. Mortimore, "https://openid.net/specs/openid-connect-core-1_0-errata2.html[OpenID Connect Core 1.0 incorporating errata set 2]", December 2023.
+
+// Maybe we want to reference the GDPR
+//  https://eur-lex.europa.eu/eli/reg/2016/679/oj
