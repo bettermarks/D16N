@@ -1,0 +1,27 @@
+/*
+ * Help! How can I edit this diagram.
+ * Go to https://pikchr.org/
+ * Specifically https://pikchr.org/home/doc/trunk/doc/userman.md is the
+ *   manual.
+ * And https://pikchr.org/home/pikchrshow is a "live" editor.
+ */
+
+right
+RP: box "RP Server" radius 4px
+line 1.5 "authorization" above <->
+IDP: box "Identity" "Provider " "(IDP)" radius 4px
+
+down
+arrow 0.75 from RP.s "access" aligned above "token" aligned below
+RPC: box "RP Client" radius 4px
+right
+
+// This commented line is an alternative to having the arror
+/*
+arrow from last box.e \
+    right until even with IDP.s \
+    then to IDP.s <-> "retrieve Clear Names"
+*/
+
+arrow from RPC.e to IDP.sw <-> "retrieve Clear Names" aligned above
+

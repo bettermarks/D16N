@@ -5,7 +5,7 @@
 = D16N Specification 1.0
 bettermarks GmbH
 v1.0, 2024-10-23
-:toc: preamble
+:toc: right
 
 
 // TODO: Include links back to this repo, for the case that reader is viewing
@@ -29,25 +29,46 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 CORS:: Cross-Origin Resource Sharing
 Clear Name:: A name that identifies an End-User to another user of the IDP. e.g. the name of a student used offline in the classroom by their teacher.
+End-User:: A human.
 Identity Provider (IDP):: Identity Provider
-Pairwise Pseudonymous Identifier (PPID):: 
+Pairwise Pseudonymous Identifier (PPID):: A Pseudonym, as we define it here, that is unique to each RP-IDP pair.
 Pseudonym:: An user identifier issued from the IDP to the RP. But one that is not Personally Identifying Informatation (PII).
+RP Client:: An application running on the End-User's device, issued by the Relying Party. For example, this may be a mobile app or a JavaScript app running in the End-User's web browser.
+RP Server:: A server or collection of servers under the control of the Relying Party
 Relying Party (RP):: Client application that relies on the IDP for user authentication.
 
 == Overview
 
-// Idea: draw overview diagram using https://pikchr.org/ ?
+// I'm not very happy with this image yet. It would be nice to get grouping boxes
+// around pieces like they have in these diagrams.
+//   https://diagrams.mingrammer.com/docs/getting-started/examples#message-collecting-system-on-gcp
+
+image::images/01-overview.svg["Overview of RP and IDP interactions",60%,opts=interactive,align=center]
+
+The general flow is the following
+
+[start=0]
+. The current user authenticates with the IDP. _Non-normative_
+. The current user performs authorization and the RP Server stores a *d16n Access Token*.
+. The RP Client obtains one or more Pseudonyms of other users the current user wishes to see the Clear Names of. _Non-normative_
+. The RP Client obtains the *d16n Access Token* from the RP Server.
+. The RP Client requests the Clear Names from the IDP using the *d16n Resolve API*.
+. The RP Client displays the Clear Names to the current user.
+
+In this way, Clear Names stored by the IDP are transmitted.
 
 == Authorization
 
 === The d16n Access Token
 
-The RP obtains a d16n access token on behalf of the user via an OAuth2.
-Only the Authorization Code Grant flow
+The RP obtains a d16n access token on behalf of the user via an OAuth 2.0 <<RFC6749>> authorization grant.
+The Authorization Code Grant flow MUST be used.
+Extensions to the Authorization Code grant such as PKCE <<RFC7636>> are acceptable.
 
+// Needs to be auth code grant because ... it's the safest. No need to enter
+// password on foreign site.
 
-
-The access token MUST be requested with the `d16n` scope.
+The access token should be requested with a `d16n` scope.
 
 The `d16n` scope permits access the the Resolve API
 
@@ -55,10 +76,22 @@ The `d16n` scope permits access the the Resolve API
 // to students.
 
 
-_Want to recommend that access token lifetime be kept short, e.g. 60s_
+It is recommended that access token lifetime, `exp - iat`, be kept short,
+on the order of 60 seconds as the access token will be sent to the RP Client
+where it is not possible to ensure secret keeping.
+See 4.1. of <<RFC7519>> for further details about `exp` and `iat` claims.
 
 
 // Suggest the IDP elide the user confirmation prompt?
+
+It is possible to perform OAuth 2.0 with PKCE in the RP Client to obtain the access token, but we recommend againt it.
+It's not conformant to issue refresh tokens to a client-side only implementation.
+Moreover, IDPs implementing this specification are not required to support it.
+
+=== Refresh Token
+
+We recommend the IDP issue a Refresh Token along the d16n Access Token.
+This usually improves user experience as the alternative requires reperforming OAuth 2.0 authorization, sending the user along a series of redirects, which interrupts their use of the application.
 
 == Pseudonyms
 
@@ -68,7 +101,27 @@ For example, in a learning app context, a teacher would have access to API that 
 
 == The Resolve API
 
-// Should we just somehow include the openapi spec?
+// It would be better to be able to include an openapi spec document.
+// There is an https://openapi-generator.tech/docs/generators/asciidoc
+// but unfortunately it seems to ignore our examples and the links are
+// broken.
+//
+// TODO: try https://github.com/luftfartsverket/openapi-to-asciidoc
+
+The Resolve API is called from the RP Client to resolve Pseudonyms into Clear Names.
+
+// TODO: replace this with a pretty SVG.
+----
+    +-----------+                                             +-------+
+    |           |                                             |       |
+    |           | --------------(1) preflight --------------> |       |
+    | RP Client | <------------(2) preflight ok-------------- |  IDP  |
+    |           |                                             |       |
+    |           | ----------(3) request clear names---------> |       |
+    |           | <----------(4) return clear names---------- |       |
+    |           |                                             |       |
+    +-----------+                                             +-------+
+----
 
 === Endpoints
 
@@ -85,6 +138,51 @@ These endpoints are implemented by the IDP.
 
 // I wonder if it would be possible to have these discovered somehow...
 
+=== Preflight
+
+The endpoints must support the `OPTIONS` method.
+
+Preflight requests are issued automatically by web browser.
+
+// Should we include an example anyway to help implementers?
+
+==== The Preflight Response
+
+The IDP 
+
+The following headers are necessary. This is however non-normative.
+Implementers are required to keep pace with standards and verify browser support themselves.
+
+// TODO(dan): add missing Access-Control-Allow-Credentials to internal spec
+
+|===
+| Header | Value
+
+| `Access-Control-Allow-Origin`
+a| The Origin of the RP Client. This may be the Host of the RP Server. e.g. `https://rp.example.com`. If the request is received from an unpermitted Origin, the IDP should not return this header.
+
+NOTE: `*` is not permitted as d16n resolve requests include credentials.
+
+TIP: The IDP can validate the `Origin` header of the request and return the value as this header value verbatim.
+
+| `Access-Control-Allow-Methods`:
+| `GET`
+
+| `Access-Control-Allow-Headers`:
+| `authorization`
+
+| `Acces-Control-Allow-Credentials`
+| `true`
+
+| `Vary`
+| `Origin`
+
+|===
+
+See <<FETCH>> for further details.
+
+// TODO: include OPTIONS request example
+
 === Resolve Request
 
 // Need to mention
@@ -93,15 +191,77 @@ These endpoints are implemented by the IDP.
 
 Non-normative example
 
-    GET /path/to/d16n/users/550e8400-e29b-41d4-a716-446655440000 HTTP/1.1
-    Host: idp.example.com
-    Authorization: Bearer imAkPG4UVhRf-TM9NcghCA
-
+----
+GET /path/to/d16n/users/550e8400-e29b-41d4-a716-446655440000 HTTP/1.1 <1>
+Host: idp.example.com <2>
+Authorization: Bearer imAkPG4UVhRf-TM9NcghCA <3>
+----
+<1> Endpoints may be rooted at an arbitrary base URL
+<2> The IDP's d16n server
+<3> The d16n access token is supplied as a bearer token
 
 === Resolve Response
 
-TODO
-- describe the successful response
+All resolve responses should have CORS headers 
+
+All responses should be of `Content-Type` `application/json`
+
+==== Success
+
+|===
+| Status Code | Description
+
+| 200
+| An object containing Clear Names
+
+|===
+
+_TODO: specify response structure_
+
+==== Errors
+
+|===
+| Status Code | Description
+
+| 401
+| Unauthorised. Token expired, invalid or not provided
+
+| 403
+| The token is valid but the user is not permitted to make the request. This can be used also when the token does not have the `d16n` scope. This status code should not be used when access is not permitted for a particular `id`, instead 404 should be returned.
+
+| 404
+| The provided Pseudonym, `id`, is not known or does not correspond to a clear name the current user is allowed to access.
+
+| 5xx
+| Server Error. The RP should be prepared to handle unexpected errors.
+
+|===
+
+All error responses have the same response body structure.
+A single JSON object with a single field
+
+`detail`:: A useful message explaining the cause of the error. There is no expectation of whether this will be shown to the End-User. At a minimum it should help debug faulty implementations.
+
+.Informative example error response
+----
+HTTP/1.1 401 OK
+Content-Type: application/json
+
+{
+  "detail": "Token expired"
+}
+----
+
+=== Batch Resolve Request
+
+_TODO_
+
+=== Batch Resolve Response
+
+// I feel like we didn't consider what happens if a teacher is allowed
+// to resolve only some students... it should be a 404.
+
+_TODO_
 
 === Access
 
@@ -111,6 +271,10 @@ TODO
        teachers can access the names of the other staff at their school
 
 == Implementation
+
+All notes in this section are considered recommendations.
+They are not mandatory for a correct implementation but all should be
+considered
 
 === Authentication with OpenID Connect
 
@@ -131,16 +295,37 @@ Not doing this may allow activity to be correlated across multiple apps and a pr
 // Maybe we need to have a section on risk?
 // consideration of the use of the clear names inside the frontend app?
 
+=== Treatment of PII in the Application
+
+It should be made clear that the response of the the d16n Resolve API contains personal data.
+The RP should take care that this personal data does not leave the End-User device.
+
+Client applications are often instrumented with telemetry in order to monitor their effectiveness and correct functioning.
+It is important to prevent that PII is sent to any telemetry service
+
+Clear Names should not be stored long-term on the End-User device.
+It may make sense to cache the Clear Names in the client for a short amount of time to avoid overburdening the IDP.
+We recommend that any caching of the Clear Names is expired when the End-User leaves the application.
+
+
+=== On-Site IDPs
+
+In the case of Schools running their identity server on their premises, schools may choose to further restrict access to the d16n Resolve API to the local network via firewall rules.
+
+// Diagram to show this?
+
 == References
 
 [bibliography]
 === Normative References
 
+* [[[FETCH]]]  Anne van Kesteren. https://fetch.spec.whatwg.org/[Fetch]. Living Standard.
 * [[[RFC6749]]] Hardt, D., Ed., "https://www.rfc-editor.org/info/rfc6749[The OAuth 2.0 Authorization Framework]", RFC 6749, DOI 10.17487/RFC6749, October 2012.
 
 [bibliography]
 === Informative References
-* [[OIDC]] Sakimura, N., Bradley, J., Jones, M., de Medeiros, B., and C. Mortimore, "https://openid.net/specs/openid-connect-core-1_0-errata2.html[OpenID Connect Core 1.0 incorporating errata set 2]", December 2023.
+* [[[RFC7636]]] Sakimura, N., Ed., Bradley, J., and N. Agarwal, "https://www.rfc-editor.org/info/rfc7636[Proof Key for Code Exchange by OAuth Public Clients]", RFC 7636, DOI 10.17487/RFC7636, September 2015.
+* [[[OIDC]]] Sakimura, N., Bradley, J., Jones, M., de Medeiros, B., and C. Mortimore, "https://openid.net/specs/openid-connect-core-1_0-errata2.html[OpenID Connect Core 1.0 incorporating errata set 2]", December 2023.
 
 // Maybe we want to reference the GDPR
 //  https://eur-lex.europa.eu/eli/reg/2016/679/oj
