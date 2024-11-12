@@ -19,7 +19,7 @@ This is written in the context of offering learning tools to children and their 
 
 == Introduction
 
-// Repeat parts of the abstract and expand on it
+// TODO: Repeat parts of the abstract and expand on it
 
 === Notational Conventions
 
@@ -42,12 +42,16 @@ Relying Party (RP):: Client application that relies on the IDP for user authenti
 // I'm not very happy with this image yet. It would be nice to get grouping boxes
 // around pieces like they have in these diagrams.
 //   https://diagrams.mingrammer.com/docs/getting-started/examples#message-collecting-system-on-gcp
+//
+// I'm also wondering if it would make sense to split into two images
+// the first that indicates how we establish the path of access i.e. acquire
+// the access token and a second that shows the containment of the data.
+// I have a sketch in my notebook.
 
 image::images/01-overview.svg["Overview of RP and IDP interactions",60%,opts=interactive,align=center]
 
 The general flow is the following
 
-[start=0]
 . The current user authenticates with the IDP. _Non-normative_
 . The current user performs authorization and the RP Server stores a *d16n Access Token*.
 . The RP Client obtains one or more Pseudonyms of other users the current user wishes to see the Clear Names of. _Non-normative_
@@ -59,6 +63,7 @@ In this way, Clear Names stored by the IDP are transmitted.
 
 == Authorization
 
+[#_the_d16n_access_token]
 === The d16n Access Token
 
 The RP obtains a d16n access token on behalf of the user via an OAuth 2.0 <<RFC6749>> authorization grant.
@@ -70,7 +75,7 @@ Extensions to the Authorization Code grant such as PKCE <<RFC7636>> are acceptab
 
 The access token should be requested with a `d16n` scope.
 
-The `d16n` scope permits access the the Resolve API
+The `d16n` scope permits access the the Resolve API.
 
 // Want to say that implementers may want to give this to teachers but not
 // to students.
@@ -84,13 +89,17 @@ See 4.1. of <<RFC7519>> for further details about `exp` and `iat` claims.
 
 // Suggest the IDP elide the user confirmation prompt?
 
+// This isn't really helpful...
 It is possible to perform OAuth 2.0 with PKCE in the RP Client to obtain the access token, but we recommend againt it.
 It's not conformant to issue refresh tokens to a client-side only implementation.
 Moreover, IDPs implementing this specification are not required to support it.
 
+// TODO: should we include an example of one or more of the requests/responses
+// or include something like a sequence diagram here... ?
+
 === Refresh Token
 
-We recommend the IDP issue a Refresh Token along the d16n Access Token.
+We recommend the IDP issue a Refresh Token along with the d16n Access Token.
 This usually improves user experience as the alternative requires reperforming OAuth 2.0 authorization, sending the user along a series of redirects, which interrupts their use of the application.
 
 == Pseudonyms
@@ -140,15 +149,28 @@ These endpoints are implemented by the IDP.
 
 === Preflight
 
-The endpoints must support the `OPTIONS` method.
+Each endpoint must support the `OPTIONS` method.
 
-Preflight requests are issued automatically by web browser.
+Preflight requests are issued automatically by the Web-Browser for any web based client.
+The RP does not need to take any further steps.
 
-// Should we include an example anyway to help implementers?
+An example request is included for the benefit of an implementing IDP to give an impression of what they can expect to receive.
 
+.Informative preflight request example
+----
+OPTIONS /path/to/d16n/users/550e8400-e29b-41d4-a716-446655440000 HTTP/1.1
+Host: idp.example.com
+Access-Control-Request-Method: GET
+Access-Control-Request-Headers: authorization
+Origin: https://rp.example.com
+----
+
+
+[#_the_preflight_response]
 ==== The Preflight Response
 
-The IDP 
+The IDP must respond to the `OPTIONS` request for the d16n endpoints.
+It should respond with a Status Code of `200`.
 
 The following headers are necessary. This is however non-normative.
 Implementers are required to keep pace with standards and verify browser support themselves.
@@ -181,13 +203,24 @@ TIP: The IDP can validate the `Origin` header of the request and return the valu
 
 See <<FETCH>> for further details.
 
-// TODO: include OPTIONS request example
+// TODO: include OPTIONS response example?
+
+.Informative preflight response example
+----
+HTTP/1.1 200
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Headers: authorization
+Access-Control-Allow-Methods: GET
+Access-Control-Allow-Origin: https://rp.example.com
+Vary: Origin
+----
 
 === Resolve Request
 
-// Need to mention
-// - the bearer token
-// - 
+The RP Client makes this request to the IDP.
+The xref:_the_d16n_access_token[d16n access token] MUST be as a Bearer Token per <<RFC6750>>.
+
+The Pseudonym to resolve it supplied as the final path component of the URL
 
 Non-normative example
 
@@ -195,6 +228,7 @@ Non-normative example
 GET /path/to/d16n/users/550e8400-e29b-41d4-a716-446655440000 HTTP/1.1 <1>
 Host: idp.example.com <2>
 Authorization: Bearer imAkPG4UVhRf-TM9NcghCA <3>
+Origin: https://rp.example.com
 ----
 <1> Endpoints may be rooted at an arbitrary base URL
 <2> The IDP's d16n server
@@ -202,9 +236,10 @@ Authorization: Bearer imAkPG4UVhRf-TM9NcghCA <3>
 
 === Resolve Response
 
-All resolve responses should have CORS headers 
+All resolve responses should have CORS headers, the _Access-Control-Allow-*_ headers,
+with the same values as in xref:_the_preflight_response[the Preflight Response].
 
-All responses should be of `Content-Type` `application/json`
+All responses should have a `Content-Type` of `application/json`.
 
 ==== Success
 
@@ -216,7 +251,29 @@ All responses should be of `Content-Type` `application/json`
 
 |===
 
-_TODO: specify response structure_
+The response body is a JSON object with three fields
+
+`id`:: The Pseudonym
+`firstname`:: A first name (a.k.a given name) belonging to the person identified by the Pseudonym.
+`lastname`:: A last name (a.k.a family name or surname) belonging to the person identified by the Pseudonym.
+
+
+.Informative example success response
+----
+HTTP/1.1 200 OK
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Headers: authorization
+Access-Control-Allow-Methods: GET
+Access-Control-Allow-Origin: https://rp.example.com
+Vary: Origin
+Content-Type: application/json
+
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "firstname": "Betty",
+  "lastname": "Free"
+}
+----
 
 ==== Errors
 
@@ -244,13 +301,14 @@ A single JSON object with a single field
 
 .Informative example error response
 ----
-HTTP/1.1 401 OK
-Content-Type: application/json
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json <1>
 
 {
   "detail": "Token expired"
 }
 ----
+<1> CORS headers omitted for brevity.
 
 === Batch Resolve Request
 
@@ -261,24 +319,53 @@ _TODO_
 // I feel like we didn't consider what happens if a teacher is allowed
 // to resolve only some students... it should be a 404.
 
-_TODO_
+==== Success
+
+A successful response contains two fields
+
+`data`:: A list of resolved user objects with the same structure as the successful Resolve Response object.
+`errors`:: An object where each unresolved Pseudonym is a key and an error detail string is the value.
+
+==== Errors
+
+Status Codes for Batch Resolve are the same as for resolving a single Pseudonym except that `404` is not used and instead errors for individual Pseudonyms are reported in the Success response.
+
+|===
+| Status Code | Description
+
+| 401
+| Unauthorised. Token expired, invalid or not provided
+
+| 403
+| The token is valid but the user is not permitted to make the request. This can be used also when the token does not have the `d16n` scope. This status code should not be used when access is not permitted for a particular `id`, instead the error should be reported in the `errors` field of the Success response.
+
+| 5xx
+| Server Error. The RP should be prepared to handle unexpected errors.
+
+|===
+
 
 === Access
 
-TODO
-- recommend that access is limited to groups that the user is a member of
-  e.g. teachers can access the names of their students
-       teachers can access the names of the other staff at their school
+When group membership is held by the IDP, it can be recommended to restrict the resolution of Pseudonyms to those belonging to members of a common group.
+
+In a learning app context this might be stated as
+
+. Teachers should be able to resolve the names of students in one of their classes
+. Teachers should be able to resolve the names of other staff members at their school or learning institute.
 
 == Implementation
 
 All notes in this section are considered recommendations.
-They are not mandatory for a correct implementation but all should be
-considered
+They are not mandatory for a correct implementation but are all worth consideration.
 
 === Authentication with OpenID Connect
 
-_Want to recommend omitting most of the standard claims <<OIDC>> §5.1, e.g. `given_name`, `family_name` duh!_
+A primary authentication method for the RP's app may be OpenID Connect with the IDP.
+When this is the case, it's worth noting here that d16n provides an alternative for accessing some personal data often exchanged during OpenID Connect.
+
+It is expected that the Standard Claims `given_name` and `family_name` from https://openid.net/specs/openid-connect-core-1_0-errata2.html#StandardClaims[§5.1] of <<OIDC>>,
+and indeed many other Standard Claims, are not made available to the RP via the ID-Token or UserInfo endpoint so that they are not processed by the RP Server.
 
 
 === Privacy
@@ -319,8 +406,9 @@ In the case of Schools running their identity server on their premises, schools 
 [bibliography]
 === Normative References
 
-* [[[FETCH]]]  Anne van Kesteren. https://fetch.spec.whatwg.org/[Fetch]. Living Standard.
+* [[[FETCH]]] Anne van Kesteren. https://fetch.spec.whatwg.org/[Fetch]. Living Standard.
 * [[[RFC6749]]] Hardt, D., Ed., "https://www.rfc-editor.org/info/rfc6749[The OAuth 2.0 Authorization Framework]", RFC 6749, DOI 10.17487/RFC6749, October 2012.
+* [[[RFC6750]]] Jones, M. and D. Hardt, "https://www.rfc-editor.org/info/rfc6750[The OAuth 2.0 Authorization Framework: Bearer Token Usage]", RFC 6750, DOI 10.17487/RFC6750, October 2012.
 
 [bibliography]
 === Informative References
