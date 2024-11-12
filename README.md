@@ -69,8 +69,8 @@ The latest version of the specification is 1.0
 
 The rendered version can be viewed ... <!-- TODO: link to >
 
-The source is found in [specs/](specs/)
-- [D16N Specification 1.0](specs/d16n-v1_0.adoc)
+The source is found in [spec/](spec/)
+- [D16N Specification 1.0](spec/d16n-v1_0.adoc)
 
 <!--
 
