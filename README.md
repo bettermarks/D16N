@@ -67,7 +67,7 @@ names without revealing those names to the creator of the app.
 
 The latest version of the specification is 1.0
 
-The rendered version can be viewed ... <!-- TODO: link to >
+The rendered version can be viewed ... <!-- TODO: link to -->
 
 The source is found in [spec/](spec/)
 - [D16N Specification 1.0](spec/d16n-v1_0.adoc)
