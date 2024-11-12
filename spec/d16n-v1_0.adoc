@@ -13,7 +13,7 @@ v1.0, 2024-10-23
 
 [abstract]
 .Abstract
-The d16n (depseudonimisation) specification describes a protocol for third-party apps to display user identifying information without having it pass through their servers.
+The d16n (depseudonymisation) specification describes a protocol for third-party apps to display user identifying information without having it pass through their servers.
 This is written in the context of offering learning tools to children and their teachers, without needing to process personal data.
 
 
@@ -90,7 +90,7 @@ See 4.1. of <<RFC7519>> for further details about `exp` and `iat` claims.
 // Suggest the IDP elide the user confirmation prompt?
 
 // This isn't really helpful...
-It is possible to perform OAuth 2.0 with PKCE in the RP Client to obtain the access token, but we recommend againt it.
+It is possible to perform OAuth 2.0 with PKCE in the RP Client to obtain the access token, but we recommend against it.
 It's not conformant to issue refresh tokens to a client-side only implementation.
 Moreover, IDPs implementing this specification are not required to support it.
 
@@ -384,7 +384,7 @@ Not doing this may allow activity to be correlated across multiple apps and a pr
 
 === Treatment of PII in the Application
 
-It should be made clear that the response of the the d16n Resolve API contains personal data.
+It should be made clear that the response of the d16n Resolve API contains personal data.
 The RP should take care that this personal data does not leave the End-User device.
 
 Client applications are often instrumented with telemetry in order to monitor their effectiveness and correct functioning.
