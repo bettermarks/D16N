@@ -75,7 +75,7 @@ Extensions to the Authorization Code grant such as PKCE <<RFC7636>> are acceptab
 
 The access token should be requested with a `d16n` scope.
 
-The `d16n` scope permits access the the Resolve API.
+The `d16n` scope permits access the xref:_the_resolve_api[Resolve API].
 
 // Want to say that implementers may want to give this to teachers but not
 // to students.
@@ -88,11 +88,6 @@ See 4.1. of <<RFC7519>> for further details about `exp` and `iat` claims.
 
 
 // Suggest the IDP elide the user confirmation prompt?
-
-// This isn't really helpful...
-It is possible to perform OAuth 2.0 with PKCE in the RP Client to obtain the access token, but we recommend against it.
-It's not conformant to issue refresh tokens to a client-side only implementation.
-Moreover, IDPs implementing this specification are not required to support it.
 
 // TODO: should we include an example of one or more of the requests/responses
 // or include something like a sequence diagram here... ?
@@ -108,6 +103,7 @@ This specification assumes that there exists an access controlled API to retriev
 
 For example, in a learning app context, a teacher would have access to API that returns the Pseudonyms of the members of one of their classes.
 
+[#_the_resolve_api]
 == The Resolve API
 
 // It would be better to be able to include an openapi spec document.
@@ -193,7 +189,7 @@ TIP: The IDP can validate the `Origin` header of the request and return the valu
 | `Access-Control-Allow-Headers`:
 | `authorization`
 
-| `Acces-Control-Allow-Credentials`
+| `Access-Control-Allow-Credentials`
 | `true`
 
 | `Vary`
@@ -202,8 +198,6 @@ TIP: The IDP can validate the `Origin` header of the request and return the valu
 |===
 
 See <<FETCH>> for further details.
-
-// TODO: include OPTIONS response example?
 
 .Informative preflight response example
 ----
@@ -412,6 +406,7 @@ In the case of Schools running their identity server on their premises, schools 
 
 [bibliography]
 === Informative References
+* [[[RFC7519]]] Jones, M., Bradley, J., and N. Sakimura, "https://www.rfc-editor.org/info/rfc7519[JSON Web Token (JWT)]", RFC 7519, DOI 10.17487/RFC7519, May 2015.
 * [[[RFC7636]]] Sakimura, N., Ed., Bradley, J., and N. Agarwal, "https://www.rfc-editor.org/info/rfc7636[Proof Key for Code Exchange by OAuth Public Clients]", RFC 7636, DOI 10.17487/RFC7636, September 2015.
 * [[[OIDC]]] Sakimura, N., Bradley, J., Jones, M., de Medeiros, B., and C. Mortimore, "https://openid.net/specs/openid-connect-core-1_0-errata2.html[OpenID Connect Core 1.0 incorporating errata set 2]", December 2023.
 
