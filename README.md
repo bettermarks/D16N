@@ -50,6 +50,29 @@ Why should EdTech's be interested in this specification?
 
 -->
 
+#### _Draft 1_
+
+Children have a lot to learn, so we want to offer them digital learning
+experiences in the form of apps.
+
+In order to have a productive learning experience,
+their teachers need to be able to identify the work of their students.
+This is easiest when the teacher can see their students identified by the same
+name they use in all apps and, in particular, the name used in the classroom.
+
+However, as app creators we have a special duty to protect the personal data
+of children. The simplest way to do that is to not receive it.
+
+#### _Draft 2_
+
+Per the [GDPR][GDPR],
+children merit specific protection with regard to their personal.
+The best way to protect that data is not to process it.
+
+We want to have a simple and common way for teachers to recognise their
+students without putting their data at risk.
+
+[GDPR]: https://eur-lex.europa.eu/eli/reg/2016/679/oj
 
 ### What
 
@@ -67,18 +90,11 @@ names without revealing those names to the creator of the app.
 
 The latest version of the specification is 1.0
 
-The rendered version can be viewed ... <!-- TODO: link to -->
+The rendered version can be viewed ... <!-- TODO: link to a rendered github pages page -->
 
 The source is found in [spec/](spec/)
 - [D16N Specification 1.0](spec/d16n-v1_0.adoc)
 
-<!--
-
-Do we want to have the whole specification in this README? or should it be a
-separate doc? e.g. it could be a generated html page served on github pages...
-🤷
-
--->
 
 ## Implementers
 
