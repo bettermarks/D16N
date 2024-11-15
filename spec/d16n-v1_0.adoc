@@ -4,7 +4,7 @@
 
 = D16N Specification 1.0
 bettermarks GmbH
-v1.0, 2024-10-23
+v1.0, 2024-11-15
 :toc: right
 
 
@@ -202,9 +202,9 @@ Vary: Origin
 === Resolve Request
 
 The RP Client makes this request to the IDP.
-The xref:_the_d16n_access_token[d16n access token] MUST be as a Bearer Token per <<RFC6750>>.
+The xref:_the_d16n_access_token[d16n access token] MUST be sent as a Bearer Token per <<RFC6750>>.
 
-The Pseudonym to resolve it supplied as the final path component of the URL
+The Pseudonym to resolve is supplied as the final path component of the URL.
 
 Non-normative example
 
@@ -225,8 +225,10 @@ with the same values as in xref:_the_preflight_response[the Preflight Response].
 
 All responses should have a `Content-Type` of `application/json`.
 
+[#_resolve_response_success]
 ==== Success
 
+[cols="1,3"]
 |===
 | Status Code | Description
 
@@ -261,6 +263,7 @@ Content-Type: application/json
 
 ==== Errors
 
+[cols="1,3"]
 |===
 | Status Code | Description
 
@@ -296,21 +299,92 @@ Content-Type: application/json <1>
 
 === Batch Resolve Request
 
-_TODO_
+The batch resolve request is a `GET` request made to the `/users/` endpoint.
+The Pseudonyms to be resolved are sent as the `ids` query parameter in the form of a comma-separated list.
+
+[cols="1,1,2a"]
+|===
+| Method | Path | Query Parameters
+
+| `GET`
+| `/users/`
+|
+
+!===
+! Parameter ! Description
+
+! `ids`
+! A comma-separated list of Pseudonyms
+
+!===
+
+|===
+
+// Recommend not to send more than x or to keep the URI less than x bytes long?
+
+.Informative example batch resolve request
+----
+GET /users/?ids=550e8400-e29b-41d4-a716-0000000000000,550e8400-e29b-41d4-a716-1111111111111
+  HTTP/1.1 <1>
+Host: idp.example.com
+Authorization: Bearer imAkPG4UVhRf-TM9NcghCA
+Origin: https://rp.example.com
+----
+<1> Line-break only for display purposes
 
 === Batch Resolve Response
 
 ==== Success
 
-A successful response contains two fields
+[cols="1,3"]
+|===
+| Status Code | Description
 
-`data`:: A list of resolved user objects with the same structure as the successful Resolve Response object.
+| 200
+| An object containing Clear Names for those Pseudonyms that could be resolved and errors for each that could not.
+
+|===
+
+The response body is a JSON object containing two fields
+
+`data`:: A list of resolved user objects, each with the same structure as the successful xref:_resolve_response_success[Resolve Response] object.
 `errors`:: An object where each unresolved Pseudonym is a key and an error detail string is the value.
+
+.Informative example batch resolve response
+----
+HTTP/1.1 200 OK
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Headers: authorization
+Access-Control-Allow-Methods: GET
+Access-Control-Allow-Origin: https://rp.example.com
+Vary: Origin
+Content-Type: application/json
+
+{
+  "data": [
+    {
+      "id": "550e8400-e29b-41d4-a716-0000000000000",
+      "firstname": "Fritz",
+      "lastname": "Müller"
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-1111111111111",
+      "firstname": "Free",
+      "lastname": "Betty"
+    }
+  ],
+  "errors": {
+    "550e8400-e29b-41d4-a716-33333333333": "Not found"
+  }
+}
+----
+
 
 ==== Errors
 
 Status Codes for Batch Resolve are the same as for resolving a single Pseudonym except that `404` is not used and instead errors for individual Pseudonyms are reported in the Success response.
 
+[cols="1,3"]
 |===
 | Status Code | Description
 
