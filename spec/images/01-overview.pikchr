@@ -16,12 +16,4 @@ arrow 0.75 from RP.s "access" aligned above "token" aligned below
 RPC: box "RP Client" radius 4px
 right
 
-// This commented line is an alternative to having the arror
-/*
-arrow from last box.e \
-    right until even with IDP.s \
-    then to IDP.s <-> "retrieve Clear Names"
-*/
-
 arrow from RPC.e to IDP.sw <-> "retrieve Clear Names" aligned above
-
