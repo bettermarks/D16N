@@ -39,15 +39,6 @@ Relying Party (RP):: Client application that relies on the IDP for user authenti
 
 == Overview
 
-// I'm not very happy with this image yet. It would be nice to get grouping boxes
-// around pieces like they have in these diagrams.
-//   https://diagrams.mingrammer.com/docs/getting-started/examples#message-collecting-system-on-gcp
-//
-// I'm also wondering if it would make sense to split into two images
-// the first that indicates how we establish the path of access i.e. acquire
-// the access token and a second that shows the containment of the data.
-// I have a sketch in my notebook.
-
 image::images/01-overview.svg["Overview of RP and IDP interactions",60%,opts=interactive,align=center]
 
 The general flow is the following
@@ -59,7 +50,7 @@ The general flow is the following
 . The RP Client requests the Clear Names from the IDP using the *d16n Resolve API*.
 . The RP Client displays the Clear Names to the current user.
 
-In this way, Clear Names stored by the IDP are transmitted.
+In this way, Clear Names stored by the IDP are transmitted only between the IDP and the End-User device.
 
 == Authorization
 
@@ -77,17 +68,18 @@ The access token should be requested with a `d16n` scope.
 
 The `d16n` scope permits access the xref:_the_resolve_api[Resolve API].
 
-// Want to say that implementers may want to give this to teachers but not
-// to students.
-
-
 It is recommended that access token lifetime, `exp - iat`, be kept short,
-on the order of 60 seconds as the access token will be sent to the RP Client
-where it is not possible to ensure secret keeping.
+on the order of 60 seconds as the access token will be sent to the RP Client where it is not possible to ensure secret keeping.
 See 4.1. of <<RFC7519>> for further details about `exp` and `iat` claims.
 
+The RP SHOULD request only the `d16n` scope when requesting authorization.
+It is RECOMMENDED that the IDP deny issuing a token containing additional scopes or restricts the issued token to only the `d16n` scope.
+Doing this again limits the usefulness of an exposed token.
 
-// Suggest the IDP elide the user confirmation prompt?
+The IDP MAY deny issuing a token for some users.
+The RP MUST accept and handle authorization errors.
+It would be recommended to attempt to provide the End-User with a functional but degraded experience in this case.
+As an example, in a learning context, a school might configure their students to be denied `d16n` scoped tokens.
 
 // TODO: should we include an example of one or more of the requests/responses
 // or include something like a sequence diagram here... ?
@@ -115,7 +107,7 @@ For example, in a learning app context, a teacher would have access to API that 
 
 The Resolve API is called from the RP Client to resolve Pseudonyms into Clear Names.
 
-// TODO: replace this with a pretty SVG.
+// This could be replaced with a pretty SVG, if someone if motivated.
 ----
     +-----------+                                             +-------+
     |           |                                             |       |
@@ -130,7 +122,7 @@ The Resolve API is called from the RP Client to resolve Pseudonyms into Clear Na
 
 === Endpoints
 
-These endpoints are implemented by the IDP.
+These endpoints MUST be implemented by the IDP.
 
 `/users/{id}`::
     Resolves the Pseudonym of a single user.
@@ -141,7 +133,7 @@ These endpoints are implemented by the IDP.
     Takes a single query parameter `ids`, a comma separated list of Pseudonyms
     to resolve.
 
-// I wonder if it would be possible to have these discovered somehow...
+The IDP MAY host these endpoints relative to common base path e.g. `/some/prefix/users/{id}`.
 
 === Preflight
 
@@ -170,8 +162,6 @@ It should respond with a Status Code of `200`.
 
 The following headers are necessary. This is however non-normative.
 Implementers are required to keep pace with standards and verify browser support themselves.
-
-// TODO(dan): add missing Access-Control-Allow-Credentials to internal spec
 
 |===
 | Header | Value
@@ -278,13 +268,13 @@ Content-Type: application/json
 | Unauthorised. Token expired, invalid or not provided
 
 | 403
-| The token is valid but the user is not permitted to make the request. This can be used also when the token does not have the `d16n` scope. This status code should not be used when access is not permitted for a particular `id`, instead 404 should be returned.
+| The token is valid but the user is not permitted to make the request. This SHOULD be returned when the token does not have the `d16n` scope. This status code SHOULD NOT be used when access is not permitted for a particular `id`, instead 404 SHOULD be returned.
 
 | 404
 | The provided Pseudonym, `id`, is not known or does not correspond to a clear name the current user is allowed to access.
 
 | 5xx
-| Server Error. The RP should be prepared to handle unexpected errors.
+| Server Error. The RP MUST be prepared to handle unexpected errors.
 
 |===
 
@@ -310,9 +300,6 @@ _TODO_
 
 === Batch Resolve Response
 
-// I feel like we didn't consider what happens if a teacher is allowed
-// to resolve only some students... it should be a 404.
-
 ==== Success
 
 A successful response contains two fields
@@ -331,10 +318,10 @@ Status Codes for Batch Resolve are the same as for resolving a single Pseudonym 
 | Unauthorised. Token expired, invalid or not provided
 
 | 403
-| The token is valid but the user is not permitted to make the request. This can be used also when the token does not have the `d16n` scope. This status code should not be used when access is not permitted for a particular `id`, instead the error should be reported in the `errors` field of the Success response.
+| The token is valid but the user is not permitted to make the request. This SHOULD be returned when the token does not have the `d16n` scope. This status code SHOULD NOT be used when access is not permitted for a particular `id`, instead the error SHOULD be reported in the `errors` field of the Success response.
 
 | 5xx
-| Server Error. The RP should be prepared to handle unexpected errors.
+| Server Error. The RP MUST be prepared to handle unexpected errors.
 
 |===
 
@@ -367,14 +354,7 @@ and indeed many other Standard Claims, are not made available to the RP via the 
 The IDP SHOULD issue PPIDs, that is, for any user a different Pseudonym is issued for each unique RP.
 In <<OIDC>> this is the `pairwise` subject identifier type.
 
-// Not sure I should
 Not doing this may allow activity to be correlated across multiple apps and a profile to collated, which encroaches on the user's privacy.
-
-// Useful reading
-// - https://openid.net/specs/openid-connect-core-1_0.html#Privacy § 17
-
-// Maybe we need to have a section on risk?
-// consideration of the use of the clear names inside the frontend app?
 
 === Treatment of PII in the Application
 
@@ -382,7 +362,7 @@ It should be made clear that the response of the d16n Resolve API contains perso
 The RP should take care that this personal data does not leave the End-User device.
 
 Client applications are often instrumented with telemetry in order to monitor their effectiveness and correct functioning.
-It is important to prevent that PII is sent to any telemetry service
+It is important to prevent that PII is sent to any telemetry service.
 
 Clear Names should not be stored long-term on the End-User device.
 It may make sense to cache the Clear Names in the client for a short amount of time to avoid overburdening the IDP.
@@ -391,9 +371,16 @@ We recommend that any caching of the Clear Names is expired when the End-User le
 
 === On-Site IDPs
 
-In the case of Schools running their identity server on their premises, schools may choose to further restrict access to the d16n Resolve API to the local network via firewall rules.
+In the case of schools running their identity server on their premises, these schools may choose to further restrict access to the d16n Resolve API to the local network via firewall rules.
 
-// Diagram to show this?
+// Diagram to show this? (Nice to have, future PR).
+
+
+// We could add a section to suggest the IDP elide the user-confirmation-prompt
+// when the user  have already authenticated the app as it may provide a
+// smoother user experience and it may be hard to explain that the RP needs
+// access to Clear Names only but won't in fact take and store them.
+// Better is if the IDP vets the RP. ... Maybe something to come back to.
 
 == References
 
