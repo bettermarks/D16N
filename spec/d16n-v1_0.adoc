@@ -79,8 +79,55 @@ The RP MUST accept and handle authorization errors.
 It would be recommended to attempt to provide the End-User with a functional but degraded experience in this case.
 As an example, in a learning context, a school might configure their students to be denied `d16n` scoped tokens.
 
-// TODO: should we include an example of one or more of the requests/responses
-// or include something like a sequence diagram here... ?
+
+To illustrate more concretely, a series of example requests that make up the authorization are detailed next.
+
+The following is an example request that the RP would cause the User Agent to make - e.g. using a 302 redirect.
+
+.Example authorization request, linebreaks added for display purposes
+----
+GET /authorize?
+    response_type=code
+    &scope=d16n
+    &client_id=TG3-GMNL0oA
+    &state=EsNOW-Pc
+    &redirect_uri=https%3A%2F%2Frp.example.com%2Fcb HTTP/1.1
+Host: idp.example.com
+----
+
+.Example authorization response
+----
+HTTP/1.1 302 Found
+Location: https://rp.example.com/cb?code=6be95bd5bb273f8f&state=EsNOW-Pc
+----
+
+The following is an example request that the RP Server would make to exchange the code for a d16n Access Token
+
+.Example token request, linebreaks added for display purposes
+----
+POST /token HTTP/1.1
+Host: idp.example.com
+Authorization: Basic VEczLUdNTkwwb0E6b0Z2NzVMNHdKdlE=
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code&code=6be95bd5bb273f8f
+&redirect_uri=https%3A%2F%2Frp.example.com%2Fcb
+----
+
+.Example token response
+----
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
+
+{
+  "access_token": "imAkPG4UVhRf-TM9NcghCA",
+  "token_type": "Bearer",
+  "refresh_token": "YRrDg3OoeqyklJPq7PpB1A",
+  "expires_in": 60
+}
+----
+
 
 === Refresh Token
 
@@ -105,7 +152,7 @@ For example, in a learning app context, a teacher would have access to API that 
 
 The Resolve API is called from the RP Client to resolve Pseudonyms into Clear Names.
 
-// This could be replaced with a pretty SVG, if someone if motivated.
+// This could be replaced with a pretty SVG, if someone feels motivated.
 ----
     +-----------+                                             +-------+
     |           |                                             |       |
