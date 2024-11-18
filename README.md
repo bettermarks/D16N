@@ -31,7 +31,7 @@
 Thoughts:
 - The App Frontend should be separated from the App Backend
 - It should be clearly labelled that the clear names don't pass through the
-  app.
+  app backend.
 
 -->
 
@@ -74,11 +74,28 @@ students without putting their data at risk.
 
 [GDPR]: https://eur-lex.europa.eu/eli/reg/2016/679/oj
 
+#### _Draft 3_
+
+As app creators we have a special duty to protect the personal data of
+children. The simplest way to do that is to not receive it.
+
+We want to have a simple and common way for teachers to recognise their
+students without putting their data at risk.
+
 ### What
 
 This is a specification and implementation guide for interoperability of
 educational apps and user identity systems such that apps can show user
 names without revealing those names to the creator of the app.
+
+We name it client-side depseudonymisation or simply d16n.
+
+D16N refers to the Depseudonymisation process used in integrations, where
+pseudonyms (abstract IDs) are exchanged instead of clear user names. This
+functionality allows a user's browser to communicate directly with IDP
+servers to resolve these IDs into identifiable names. D16N enhances privacy by
+ensuring that user identities remain protected during data exchanges,
+particularly in educational contexts where sensitive information is involved.
 
 ### For Whom
 
@@ -111,14 +128,14 @@ already.
 
 ### Identity Providers
 
-Project Name        | Maintainers       | Point of Contact      | Project URL
+Product Name        | Maintainers       | Point of Contact      | URL
 ------------------- | ----------------- | --------------------- | -----------
 
 
 ### Applications
 
-Project Name    | Maintainers      | Point of Contact           | Project URL
---------------- | ---------------- | -------------------------- | ----------------------------
+Product Name    | Maintainers      | Point of Contact           | URL
+--------------- | ---------------- | -------------------------- | --------------------------
 bettermarks     | bettermarks GmbH | kontakt@bettermarks.com    | https://bettermarks.com/
 
 

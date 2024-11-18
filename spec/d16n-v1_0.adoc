@@ -7,9 +7,7 @@ bettermarks GmbH
 v1.0, 2024-11-15
 :toc: right
 
-
-// TODO: Include links back to this repo, for the case that reader is viewing
-// github pages.
+The source for this specification can be found at https://github.com/bettermarks/d16n.
 
 [abstract]
 .Abstract
