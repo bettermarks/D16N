@@ -11,29 +11,7 @@
 
 ## Description
 
-<!-- TODO replace this with mermaid / PUML -->
-
-```
-                       1. auth + get pseudonym
-
-              +-------------+           +-----+
-              | App Backend | <-------> | IDP |
-              +-------------+           +-----+
- 2. get access token ^                     ^
-                     |                     |
-              +--------------+             |
-              | App Frontend |-------------+  3 Resolve pseudonym
-              +--------------+              aka retrieve clear names
-
-```
-<!--
-
-Thoughts:
-- The App Frontend should be separated from the App Backend
-- It should be clearly labelled that the clear names don't pass through the
-  app backend.
-
--->
+![Connection: sequence SVG](diagrams/connection.svg)
 
 
 ### Why
