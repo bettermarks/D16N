@@ -1,20 +1,20 @@
 @startuml
 skinparam backgroundColor white
 
-rectangle IDP #red
+rectangle IDP #FAC711
 
 rectangle RelyingParty as "Relying Party" #D9D9D9 {
-  rectangle Client #red
-  rectangle Server #blue
+  rectangle Client #FAC711
+  rectangle Server #85BCF0
 }
 
-IDP <-[#blue]down-> Server : Authorization
-IDP -[#red]left-> Client : Clear Names
-Client <-[#blue]right- Server : Access Token
+IDP <-[#85BCF0]down-> Server : Authorization
+IDP -[#FAC711]left-> Client : Clear Names
+Client <-[#85BCF0]right- Server : Access Token
 
  legend
- |<back:#blue>   </back>| Depseudonymized Area |
- |<back:#red>   </back>| Pseudonymized Area |
+ |<back:#85BCF0>   </back>| Depseudonymized Area |
+ |<back:#FAC711>   </back>| Pseudonymized Area |
  endlegend
 
 @enduml
