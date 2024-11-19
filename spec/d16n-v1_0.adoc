@@ -66,9 +66,8 @@ The access token should be requested with a `d16n` scope.
 
 The `d16n` scope permits access the xref:_the_resolve_api[Resolve API].
 
-It is recommended that access token lifetime, `exp - iat`, be kept short,
+It is recommended that access token lifetime be kept short,
 on the order of 60 seconds as the access token will be sent to the RP Client where it is not possible to ensure secret keeping.
-See 4.1. of <<RFC7519>> for further details about `exp` and `iat` claims.
 
 The RP SHOULD request only the `d16n` scope when requesting authorization.
 It is RECOMMENDED that the IDP deny issuing a token containing additional scopes or restricts the issued token to only the `d16n` scope.
@@ -512,7 +511,6 @@ In the case of schools running their identity server on their premises, these sc
 
 [bibliography]
 === Informative References
-* [[[RFC7519]]] Jones, M., Bradley, J., and N. Sakimura, "https://www.rfc-editor.org/info/rfc7519[JSON Web Token (JWT)]", RFC 7519, DOI 10.17487/RFC7519, May 2015.
 * [[[RFC7636]]] Sakimura, N., Ed., Bradley, J., and N. Agarwal, "https://www.rfc-editor.org/info/rfc7636[Proof Key for Code Exchange by OAuth Public Clients]", RFC 7636, DOI 10.17487/RFC7636, September 2015.
 * [[[OIDC]]] Sakimura, N., Bradley, J., Jones, M., de Medeiros, B., and C. Mortimore, "https://openid.net/specs/openid-connect-core-1_0-errata2.html[OpenID Connect Core 1.0 incorporating errata set 2]", December 2023.
 
