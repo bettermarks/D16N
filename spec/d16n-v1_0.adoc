@@ -19,6 +19,28 @@ This is written in the context of offering learning tools to children and their 
 
 // TODO: write introduction
 
+It has become common to develop apps that use some form of single sign-on (SSO) to deliver functionality in institutional or educational settings.
+
+By using a single sign-on scheme, such as OpenID Connect, the third-party app often receives personal data, such as the full name, of a user during the authentication in order to present that user to other users of the app.
+As the personal data is transferred to the server of the app, any logging, caching or storage of what is received must be treated with the appropriate level of data privacy safeguards.
+When the server of the app receives this data, any logging, caching or storage it performs must be with the appropriate level of data privacy safeguards.
+
+In the education space, when building such apps for the school system this becomes problematic.
+
+// Is this true? Was it ever an alternative option for bettermarks to receive parental consent? Or is it in fact the case that we anyway get the parental consent - just for the reduced scope
+// of "anonymised" usage.
+Either each app needs to be given consent by parents to process their childrens data
+or the identities of the children need to be hidden by some means of manual pseudonymisation.
+That is, the app receives and can only show something like a nickname that each teacher must mentally, or using a crib sheet, translate into the names of their students.
+
+// Does data kept on the client need to be covered by a privacy policy?
+D16N approaches this problem by specifying a way for a the client-side component of a third-party app to directly retrieve the names of users from the IDP.
+In this way, it should be possible to display recognisable names of students without exposing them beyond the bounds of a teacher's device.
+
+It prescribes an automatic pseudonymisation and the issuance of an access token that enables the a client to look up the pseudonym in the metaphorical crib sheet, the Resolve API.
+
+// Should we warn people that any risks, as before, that were present on the frontend, e.g. malicious javascript, remain....
+
 === Notational Conventions
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in https://www.rfc-editor.org/rfc/rfc2119[RFC 2119].
