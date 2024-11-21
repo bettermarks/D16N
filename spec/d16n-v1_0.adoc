@@ -40,6 +40,8 @@ In this way, it should be possible to display recognisable names of students wit
 It prescribes an automatic pseudonymisation and the issuance of an access token that enables the a client to look up the pseudonym in the metaphorical crib sheet, the Resolve API.
 
 // Should we warn people that any risks, as before, that were present on the frontend, e.g. malicious javascript, remain....
+//
+// ¡¡ Or maybe this is where Clemens suggestion about CSP headers comes in. .i.e. preventing that the client can send the data to any malicious 3rd-party. !!
 
 === Notational Conventions
 
