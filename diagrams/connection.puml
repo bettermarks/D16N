@@ -8,8 +8,8 @@ rectangle RelyingParty as "Relying Party" #D9D9D9 {
   rectangle Server #85BCF0
 }
 
-IDP <-[#85BCF0]down-> Server : Authorization
-IDP -[#FAC711]left-> Client : Clear Names
+IDP "Authorization" <-[#85BCF0]down-> Server
+IDP "Clear Names" -[#FAC711]left-> Client
 Client <-[#85BCF0]right- Server : Access Token
 
  legend

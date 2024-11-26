@@ -17,7 +17,19 @@ This is written in the context of offering learning tools to children and their 
 
 == Introduction
 
-// TODO: write introduction
+It has become common to develop apps that make use of single sign-on (SSO) in various forms to provide functionality in institutional or educational settings
+
+By using an SSO scheme, such as OpenID Connect, the third-party apps often receive personal data, such as the user's full name, during the authentication. 
+This information is typically used to display that user to other users of the app. However, transferring personal data to the app's server requires an increased level of data privacy safeguards, including proper logging, caching, and storage protocols.
+
+In the education space, when building such apps for the school system this becomes problematic. 
+Through https://eur-lex.europa.eu/eli/reg/2016/679/oj[GDPR] regulations children's data is subject to special protection and needs to be hidden by some means of pseudonymisation. 
+On the other hand, it is essential for a teacher to be able to match students' data to the actual individuals.
+
+D16N approaches this problem by specifying a way for a the client-side component of a third-party app to directly retrieve the users' names directly from the IDP.
+In this way, it should be possible to display recognisable names of students without exposing them beyond the bounds of a teacher's device.
+
+It prescribes an automatic pseudonymisation and the issuance of an access token that enables the a client to look up the pseudonym in the an API implemented by the IDP, the xref:_the_resolve_api[Resolve API].
 
 === Notational Conventions
 
@@ -487,6 +499,10 @@ Clear Names should not be stored long-term on the End-User device.
 It may make sense to cache the Clear Names in the client for a short amount of time to avoid overburdening the IDP.
 We recommend that any caching of the Clear Names is expired when the End-User leaves the application.
 
+=== Content Security Policy (CSP) Headers
+
+The RP should use https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP[CSP] headers to ensure only whitelisted domains can be called. 
+This prevents the client sending sensitive data to any unintended third party.
 
 === On-Site IDPs
 
