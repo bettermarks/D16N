@@ -31,12 +31,10 @@ names without revealing those names to the creator of the app.
 
 We name it client-side depseudonymisation or simply d16n.
 
-D16N refers to the Depseudonymisation process used in integrations, where
+D16N refers to the depseudonymisation process used in integrations, where
 pseudonyms (abstract IDs) are exchanged instead of clear user names. This
 functionality allows a user's browser to communicate directly with IDP
-servers to resolve these IDs into identifiable names. D16N enhances privacy by
-ensuring that user identities remain protected during data exchanges,
-particularly in educational contexts where sensitive information is involved.
+servers to resolve these IDs into identifiable names.
 
 ### For Whom
 
