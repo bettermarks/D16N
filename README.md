@@ -16,7 +16,7 @@
 
 ### Why
 
-As app creators, we have a profound responsibility to safeguard the personal
+As EdTech app creators, we have a profound responsibility to safeguard the personal
 data of children. The most effective way to protect it is to avoid collecting
 it altogether.
 
