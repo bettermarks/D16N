@@ -13,8 +13,8 @@ IDP "Clear Names" -[#FAC711]left-> Client
 Client <-[#85BCF0]right- Server : Access Token
 
  legend
- |<back:#85BCF0>   </back>| Depseudonymized Area |
- |<back:#FAC711>   </back>| Pseudonymized Area |
+ |<back:#85BCF0>   </back>| Pseudonymized Area |
+ |<back:#FAC711>   </back>| Depseudonymized Area |
  endlegend
 
 @enduml
